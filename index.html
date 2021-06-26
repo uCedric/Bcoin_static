@@ -2,38 +2,148 @@
 <html lang="zh-TW">
 	<head>
 		<title>web porgraming home work+-+-+-++-</title>
-		<link rel="stylesheet" href="">
+		<style type="text/css">
+			.flat p{	
+				font-size:24px;
+				padding:10px;
+				margin:10px;
+				display:inline-block;
+			}
+			#flat{
+				background-color:#B3D9D9;
+			}
+			h1{
+				background-color:#6FB7B7;
+			}
+		</style>
 	</head>
 	<body>
+		<img src="images.jpg"  width="50px" height="50px">
+		<h1 >比特幣轉換台幣</h1>
+		<div class="flat" id="flat">
+			<p>匯率日期</p>
+			<input  placeholder="請輸入日期 yyyy-mm-dd" type="text" name="date" id="date">
+			<input  placeholder="請輸入金額" type="text" name="dollar" id="dollar">
+			<p>比特幣</p>
+			<input type="button" value="轉換" onclick="transfer()">
+			<p id="result1">為</p>	
+			<p>當前匯率 :</p>		
+			<p id="result2">NTD</p>			
+		</div>
 		<div class="chart-container" style="position:relative;height:1000px;width:1000px">
+			<p><img src="bcoin.png"  width="30px" height="30px">比特幣歷史紀錄表</p>
 			<canvas id="myChart"></canvas>
 		</div>
+		
 		<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2/dist/chart.min.js"></script>
+
 		<script> src="js/main.js"</script>
+
 		<script>
 			var ctx = document.getElementById('myChart');
 			var myChart = new Chart(ctx, {
 			  type: 'bar',
 			  data: {
-			    labels: ['一月', '二月', '三月','四月','五月','六月'],
+			    labels: ['2011','2012','2013','2014','2015','2016','2017','2018','2019','2020'],
 			    datasets: [{
-			      backgroundColor: [
-			        'rgba(255, 99, 132, 0.2)',
-			        'rgba(54, 162, 235, 0.2)',
-			        'rgba(255, 206, 86, 0.2)'
-			      ],
- 			     borderColor: [
-  			      'rgba(255,99,132,1)',
-  			      'rgba(54, 162, 235, 1)',
-  			      'rgba(255, 206, 86, 1)',
- 			      'rgba(75, 192, 192, 1)'
- 			     ],
- 			     borderWidth: 1,
- 			     label: '銷售業績(百萬)',
- 			     data: [60, 49, 72,50,65,98]
- 			   }]
+			    	backgroundColor: [
+			        	'rgba(255, 99, 132, 0.2)',
+			        	'rgba(54, 162, 235, 0.2)',
+			        	'rgba(255, 206, 86, 0.2)'
+			      	],
+ 			    	borderColor: [
+  			      	'rgba(255,99,132,1)',
+  			      	'rgba(54, 162, 235, 1)',
+  			      	'rgba(255, 206, 86, 1)',
+ 			      	'rgba(75, 192, 192, 1)'
+ 			     	],
+ 			     	borderWidth: 1,
+ 			     	label: '2011~2020年度平均價格',
+ 			     	data: ['5.6','8.3','200.1','522.9','272.0','589.8','4299.8','7183.1','7325.8','12301.3']
+				},
+				{
+				type: 'line',
+      				label: '2011~2020年度最高成交價格折線圖',
+      				data: ['31.9','15.4','1241.9','1093.4','492.8','982.6','19870.6','17252.8','13929.8','29298.8']
+				}
+			    ]
  			 }
 			});
 		</script>
+		<script>		
+			function transfer(){
+				var date= document.getElementById("date").value;
+				var dollar=document.getElementById('dollar').value;
+				const uri='https://api.coindesk.com/v1/bpi/historical/close.json?start='+date+'&end='+date;
+				var status=new Request(uri);
+				fetch(status).then(function(response){if(response.status!=200){alert('查無該筆匯率資料');}});				
+
+				if(date!=null || dollar!=null){
+					var r=date.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+					if(r!=null){
+						if(dollar>0){
+							fetch(status)
+								.then(content => {if(content!=null){return content.json();}else{alert('查無該筆匯率資料');}})
+								.then(content2 => {
+									if(content2.bpi[date]==null){
+										alert('查無該筆匯率資料');
+									}else{
+										document.getElementById("result1").innerHTML ="為" + content2.bpi[date]*dollar*30 + " NTD";
+										document.getElementById("result2").innerHTML ="1 比特幣約" + content2.bpi[date]*30 + " NTD"
+									}
+								})
+								.catch(function(){alert('查無該筆匯率資料');});
+						}else{
+							alert('輸入金額錯誤');
+						}
+					}else{
+						alert('日期請輸入正確格式:yyyy-mm-dd。ex:2021-06-11');
+					}
+				}else{
+					alert('請輸入日期或金額');
+				}			
+			}
+		</script>
+//		<script>
+//			var record=[];
+//			var cal=0;
+//			var year=2011;
+//			var mon=1;
+//			var date=1;
+//
+//			while(year<=2020){
+//				year_s = year.toString() ;
+//				while(mon<=12){
+//
+//					if(mon<10){var mon_s = "0" + mon.toString() ;}
+//					else{var mon_s = mon.toString() ;}
+//
+//					if(mon=2){
+//						while(date<=28){
+//							if(date<10){ var date_s = "0" + date.toString() ;}
+//							else{var date_s = date.toString() ;}
+//							var date_final=year_s+'-'+mon_s+'-'+date_s;
+//							const url='https://api.coindesk.com/v1/bpi/historical/close.json?start='+date_final+'&end='+date_final;
+//							fetch(url).then(x1 => {return x1.json();})
+//									.then(x2 => {cal = cal + parseFloat(x2.bpi[year_s+'-'+mon_s+'-'+date_s])});
+//							date+=1;
+//						}
+//					}
+//					else{
+//						while(date<=30){
+//							if(date<10){ var date_s = "0" + date.toString() ;}
+//							else{var date_s = date.toString() ;}
+//							url='https://api.coindesk.com/v1/bpi/historical/close.json?start='+year_s+'-'+mon_s+'-'+date_s+'&end='+year_s+'-'+mon_s+'-'+date_s;
+//							fetch(url).then(x1 => {return x1.json();})
+//									.then(x2 => {cal = cal + parseFloat(x2.bpi[year_s+'-'+mon_s+'-'+date_s])});
+//							date+=1;
+//						}
+//					}
+//					mon+=1;	
+//				}
+//				record.push(cal/365);
+//				year+=1;
+//			}
+//		</script>
 	</body>
 </html>
